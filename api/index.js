@@ -39,13 +39,19 @@ module.exports = async (req, res) => {
 
     // Handle submitting new data (POST)
     if (req.method === 'POST') {
-      const newRecord = await Record.create(req.body);
+      const payload = req.body && typeof req.body === 'object' ? req.body : {};
+      const newRecord = await Record.create(payload);
       return res.status(201).json(newRecord);
     }
 
     return res.status(405).json({ error: 'Method Not Allowed' });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Database connection failed' });
+    console.error('API error:', error);
+    const isConfigError = /MONGODB_URI/.test(error.message || '');
+    return res.status(500).json({
+      error: isConfigError
+        ? 'Server configuration error: MONGODB_URI is not set'
+        : 'Database operation failed'
+    });
   }
 };
