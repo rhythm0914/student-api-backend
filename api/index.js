@@ -52,7 +52,14 @@ module.exports = async (req, res) => {
       error: isConfigError
         ? 'Server configuration error: MONGODB_URI is not set'
         : 'Database operation failed',
-      detail: describeError(error)
+      detail: describeError(error),
+      probe: {
+        bodyType: typeof req.body,
+        bodyIsArray: Array.isArray(req.body),
+        bodyValue: typeof req.body === 'string' ? req.body.slice(0, 80) : undefined,
+        contentType: req.headers ? req.headers['content-type'] : undefined,
+        contentLength: req.headers ? req.headers['content-length'] : undefined
+      }
     });
   }
 };
