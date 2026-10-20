@@ -11,9 +11,16 @@ const RecordSchema = new mongoose.Schema({
 const Record = mongoose.models.Record || mongoose.model('Record', RecordSchema);
 
 module.exports = async (req, res) => {
-  // Enable CORS so GitHub Pages can communicate with this API
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*'); 
+  // Enable CORS so GitHub Pages can communicate with this API.
+  // The origin is echoed back instead of using "*" so the response stays valid
+  // when Access-Control-Allow-Credentials is set.
+  const requestOrigin = req.headers.origin;
+  if (requestOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', requestOrigin);
+    res.setHeader('Vary', 'Origin');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
