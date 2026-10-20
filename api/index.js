@@ -51,7 +51,20 @@ module.exports = async (req, res) => {
     return res.status(500).json({
       error: isConfigError
         ? 'Server configuration error: MONGODB_URI is not set'
-        : 'Database operation failed'
+        : 'Database operation failed',
+      detail: describeError(error)
     });
   }
 };
+
+// Returns a short, credential free description of an error so failures can be
+// diagnosed without exposing the connection string.
+function describeError(error) {
+  const uri = process.env.MONGODB_URI || '';
+  const message = (error && error.message ? error.message : String(error))
+    .split(uri)
+    .join('***')
+    .replace(/mongodb(\+srv)?:\/\/[^\s"']*/g, 'mongodb://***');
+
+  return `${(error && error.name) || 'Error'}: ${message}`.slice(0, 300);
+}
